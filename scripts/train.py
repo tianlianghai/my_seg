@@ -321,8 +321,8 @@ def save_checkpoint(model, args, is_best=False):
 if __name__ == '__main__':
     args = parse_args()
 
-    dist.init_process_group("nccl")
-    rank = dist.get_rank()
+    # dist.init_process_group("nccl")
+    # rank = dist.get_rank()
     # reference maskrcnn-benchmark
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     args.num_gpus = num_gpus
@@ -340,8 +340,8 @@ if __name__ == '__main__':
             args.device = "cpu"
     print("Using device: ", args.device)
     if args.distributed:
-        torch.cuda.set_device(args.local_rank)
-        torch.distributed.init_process_group(backend="nccl", init_method="env://")
+        # torch.cuda.set_device(args.local_rank)
+        torch.distributed.init_process_group(backend="nccl")
         synchronize()
     args.lr = args.lr * num_gpus
 
