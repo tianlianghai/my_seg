@@ -94,6 +94,7 @@ def parse_args():
                         help='run validation every val-epoch')
     parser.add_argument('--skip-val', action='store_true', default=False,
                         help='skip validation during training')
+    parser.add_argument("--amp", action="store_true")
     args = parser.parse_args()
 
     # default settings for epochs, batch_size and lr
@@ -206,7 +207,12 @@ class Trainer(object):
         save_per_iters = self.args.save_epoch * self.args.iters_per_epoch
         start_time = time.time()
         logger.info('Start training, Total Epochs: {:d} = Total Iterations {:d}'.format(epochs, max_iters))
-        scaler = GradScaler()
+       
+        if self.args.amp:
+            scaler = torch.cuda.amp.GradScaler()
+            print("AMP enabled.")
+        else:
+            print("AMP disabled.")
         self.model.train()
         for iteration, (images, targets, _) in enumerate(self.train_loader):
             self.optimizer.zero_grad()
@@ -215,10 +221,15 @@ class Trainer(object):
 
             images = images.to(self.device)
             targets = targets.to(self.device)
-
-            with torch.cuda.amp.autocast():
+            
+            if self.args.amp:
+                with torch.cuda.amp.autocast():
+                    outputs = self.model(images)
+                    loss_dict = self.criterion(outputs, targets)
+            else:
                 outputs = self.model(images)
                 loss_dict = self.criterion(outputs, targets)
+
 
             losses = sum(loss for loss in loss_dict.values())
 
@@ -226,12 +237,14 @@ class Trainer(object):
             loss_dict_reduced = reduce_loss_dict(loss_dict)
             losses_reduced = sum(loss for loss in loss_dict_reduced.values())
 
-            # self.optimizer.zero_grad()
-            # losses.backward()
-            # self.optimizer.step()
-            scaler.scale(losses).backward()
-            scaler.step(self.optimizer )
-            scaler.update()
+            if self.args.amp:
+                scaler.scale(losses).backward()
+                scaler.step(self.optimizer )
+                scaler.update()
+            else:
+                self.optimizer.zero_grad()
+                losses.backward()
+                self.optimizer.step()
 
             eta_seconds = ((time.time() - start_time) / iteration) * (max_iters - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
