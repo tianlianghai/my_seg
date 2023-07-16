@@ -14,7 +14,7 @@ from core.models import get_model
 
 parser = argparse.ArgumentParser(
     description='Predict segmentation result from a given image')
-parser.add_argument('--model', type=str, default='fcn_resnet50_voc',
+parser.add_argument('--model', type=str, default='deeplabv3_resnet50_voc',
                     help='model name (default: fcn32_vgg16)')
 parser.add_argument('--dataset', type=str, default='pascal_aug', choices=['pascal_voc, pascal_aug, ade20k, citys'],
                     help='dataset name (default: pascal_voc)')
