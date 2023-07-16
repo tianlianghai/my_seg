@@ -32,7 +32,7 @@ def infer(image):
     mask = get_color_pallete(pred, args.dataset)
     outname = os.path.splitext(os.path.split(args.input_pic)[-1])[0] + '.png'
     mask.save(os.path.join(args.outdir, outname))
-    return(mask)
+    return mask
 
 
 if __name__ == '__main__':
