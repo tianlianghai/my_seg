@@ -12,29 +12,13 @@ from PIL import Image
 from core.utils.visualize import get_color_pallete
 from core.models import get_model
 
-parser = argparse.ArgumentParser(
-    description='Predict segmentation result from a given image')
-parser.add_argument('--model', type=str, default='deeplabv3_resnet50_voc',
-                    help='model name (default: fcn32_vgg16)')
-parser.add_argument('--dataset', type=str, default='pascal_aug', choices=['pascal_voc, pascal_aug, ade20k, citys'],
-                    help='dataset name (default: pascal_voc)')
-parser.add_argument('--save-folder', default='~/.torch/models',
-                    help='Directory for saving checkpoint models')
-parser.add_argument('--input-pic', type=str, default='../datasets/voc/VOC2012/JPEGImages/2007_000032.jpg',
-                    help='path to the input picture')
-parser.add_argument('--outdir', default='./eval', type=str,
-                    help='path to save the predict result')
-parser.add_argument('--local_rank', type=int, default=0)
-parser.add_argument('--aux', action='store_true')
-args = parser.parse_args()
 
 
 def infer(image):
-    config = args
+    # print(args.__dict__)
+    {'model': 'deeplabv3_resnet50_voc', 'dataset': 'pascal_aug', 'save_folder': '~/.torch/models', 
+     'input_pic': '../datasets/voc/VOC2012/JPEGImages/2007_000032.jpg', 'outdir': './eval', 'local_rank': 0, 'aux': False}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # output folder
-    if not os.path.exists(config.outdir):
-        os.makedirs(config.outdir)
 
     # image transform
     transform = transforms.Compose([
@@ -44,7 +28,7 @@ def infer(image):
     # image = Image.open(config.input_pic).convert('RGB')
     images = transform(image).unsqueeze(0).to(device)
 
-    model = get_model(args.model, pretrained=True, aux=config.aux,  root=args.save_folder).to(device)
+    model = get_model(args.model, pretrained=True, aux=False,  root=args.save_folder).to(device)
     print('Finished loading model!')
 
     model.eval()
@@ -60,4 +44,5 @@ def infer(image):
 
 if __name__ == '__main__':
     # demo(args)
+    infer("args")
     pass
