@@ -48,7 +48,7 @@ def parse_args():
     parser.add_argument('--workers', '-j', type=int, default=4,
                         metavar='N', help='dataloader threads')
     # training hyper params
-    parser.add_argument('--jpu', action='store_true', default=False,
+    parser.add_argument('--jpu', action='store_true',
                         help='JPU')
     parser.add_argument('--use-ohem', type=bool, default=False,
                         help='OHEM Loss for cityscapes dataset')
@@ -95,6 +95,7 @@ def parse_args():
     parser.add_argument('--skip-val', action='store_true', default=False,
                         help='skip validation during training')
     parser.add_argument("--amp", action="store_true")
+    parser.add_argument("--use_mps",action='store_true')
     args = parser.parse_args()
 
     # default settings for epochs, batch_size and lr
@@ -213,6 +214,8 @@ class Trainer(object):
             print("AMP enabled.")
         else:
             print("AMP disabled.")
+        print("save initial model")
+        save_checkpoint(self.model, self.args, is_best=False)
         self.model.train()
         for iteration, (images, targets, _) in enumerate(self.train_loader):
             self.optimizer.zero_grad()
@@ -326,7 +329,11 @@ if __name__ == '__main__':
         args.device = "cuda"
     else:
         args.distributed = False
-        args.device = "cpu"
+        if torch.has_mps and args.use_mps:
+            args.device = 'mps'
+        else:
+            args.device = "cpu"
+    print("Using device: ", args.device)
     if args.distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend="nccl", init_method="env://")

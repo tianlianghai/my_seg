@@ -47,7 +47,7 @@ class Evaluator(object):
         BatchNorm2d = nn.SyncBatchNorm if args.distributed else nn.BatchNorm2d
         self.model = get_segmentation_model(model=args.model, dataset=args.dataset, backbone=args.backbone,
                                             aux=args.aux, pretrained=True, pretrained_base=False,
-                                            local_rank=args.local_rank,
+                                            # local_rank=args.local_rank,
                                             norm_layer=BatchNorm2d).to(self.device)
         if args.distributed:
             self.model = nn.parallel.DistributedDataParallel(self.model,

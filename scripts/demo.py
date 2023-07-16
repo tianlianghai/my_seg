@@ -14,7 +14,7 @@ from core.models import get_model
 
 parser = argparse.ArgumentParser(
     description='Predict segmentation result from a given image')
-parser.add_argument('--model', type=str, default='fcn32s_vgg16_voc',
+parser.add_argument('--model', type=str, default='fcn_resnet50_voc',
                     help='model name (default: fcn32_vgg16)')
 parser.add_argument('--dataset', type=str, default='pascal_aug', choices=['pascal_voc, pascal_aug, ade20k, citys'],
                     help='dataset name (default: pascal_voc)')
@@ -25,6 +25,7 @@ parser.add_argument('--input-pic', type=str, default='../datasets/voc/VOC2012/JP
 parser.add_argument('--outdir', default='./eval', type=str,
                     help='path to save the predict result')
 parser.add_argument('--local_rank', type=int, default=0)
+parser.add_argument('--aux', action='store_true')
 args = parser.parse_args()
 
 
@@ -42,7 +43,7 @@ def demo(config):
     image = Image.open(config.input_pic).convert('RGB')
     images = transform(image).unsqueeze(0).to(device)
 
-    model = get_model(args.model, local_rank=args.local_rank, pretrained=True, root=args.save_folder).to(device)
+    model = get_model(args.model, pretrained=True, aux=config.aux,  root=args.save_folder).to(device)
     print('Finished loading model!')
 
     model.eval()
