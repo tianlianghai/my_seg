@@ -13,6 +13,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data
 import torch.backends.cudnn as cudnn
+from torch.cuda.amp import autocast, GradScaler
 
 from torchvision import transforms
 from core.data.dataloader import get_segmentation_dataset
@@ -205,17 +206,19 @@ class Trainer(object):
         save_per_iters = self.args.save_epoch * self.args.iters_per_epoch
         start_time = time.time()
         logger.info('Start training, Total Epochs: {:d} = Total Iterations {:d}'.format(epochs, max_iters))
-
+        scaler = GradScaler()
         self.model.train()
         for iteration, (images, targets, _) in enumerate(self.train_loader):
+            self.optimizer.zero_grad()
             iteration = iteration + 1
             self.lr_scheduler.step()
 
             images = images.to(self.device)
             targets = targets.to(self.device)
 
-            outputs = self.model(images)
-            loss_dict = self.criterion(outputs, targets)
+            with torch.cuda.amp.autocast():
+                outputs = self.model(images)
+                loss_dict = self.criterion(outputs, targets)
 
             losses = sum(loss for loss in loss_dict.values())
 
@@ -223,9 +226,12 @@ class Trainer(object):
             loss_dict_reduced = reduce_loss_dict(loss_dict)
             losses_reduced = sum(loss for loss in loss_dict_reduced.values())
 
-            self.optimizer.zero_grad()
-            losses.backward()
-            self.optimizer.step()
+            # self.optimizer.zero_grad()
+            # losses.backward()
+            # self.optimizer.step()
+            scaler.scale(losses).backward()
+            scaler.step(self.optimizer )
+            scaler.update()
 
             eta_seconds = ((time.time() - start_time) / iteration) * (max_iters - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
