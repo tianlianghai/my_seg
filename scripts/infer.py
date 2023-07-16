@@ -9,7 +9,7 @@ def infer(image):
     from argparse import Namespace
     # print(args.__dict__)
     args= {'model': 'deeplabv3_resnet50_voc', 
-        #    'dataset': 'pascal_aug',
+           'dataset': 'pascal_voc',
              'save_folder': '~/.torch/models', 
     # 'local_rank': 0, 'aux': False
     }
