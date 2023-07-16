@@ -1,20 +1,21 @@
-import os
-import sys
-import argparse
-import torch
 
-# cur_path = os.path.abspath(os.path.dirname(__file__))
-# root_path = os.path.split(cur_path)[0]
-# sys.path.append(root_path)
-
-from torchvision import transforms
-from PIL import Image
-from core.utils.visualize import get_color_pallete
-from core.models import get_model
 
 
 
 def infer(image):
+    import os
+    import sys
+    import argparse
+    import torch
+
+    # cur_path = os.path.abspath(os.path.dirname(__file__))
+    # root_path = os.path.split(cur_path)[0]
+    # sys.path.append(root_path)
+
+    from torchvision import transforms
+    from PIL import Image
+    from core.utils.visualize import get_color_pallete
+    from core.models import get_model
     # print(args.__dict__)
     args= {'model': 'deeplabv3_resnet50_voc', 'dataset': 'pascal_aug', 'save_folder': '~/.torch/models', 
      'input_pic': '../datasets/voc/VOC2012/JPEGImages/2007_000032.jpg', 'outdir': './eval', 'local_rank': 0, 'aux': False}
