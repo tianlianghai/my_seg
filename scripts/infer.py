@@ -1,17 +1,7 @@
 
-
-
-
 def infer(image):
     import os
-    import sys
-    import argparse
     import torch
-
-    # cur_path = os.path.abspath(os.path.dirname(__file__))
-    # root_path = os.path.split(cur_path)[0]
-    # sys.path.append(root_path)
-
     from torchvision import transforms
     from PIL import Image
     from core.utils.visualize import get_color_pallete
