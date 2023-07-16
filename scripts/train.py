@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.utils.data as data
 import torch.backends.cudnn as cudnn
 from torch.cuda.amp import autocast, GradScaler
+from torch import distributed as dist
 
 from torchvision import transforms
 from core.data.dataloader import get_segmentation_dataset
@@ -320,10 +321,14 @@ def save_checkpoint(model, args, is_best=False):
 if __name__ == '__main__':
     args = parse_args()
 
+    dist.init_process_group("nccl")
+    rank = dist.get_rank()
     # reference maskrcnn-benchmark
     num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     args.num_gpus = num_gpus
     args.distributed = num_gpus > 1
+    
+    print(f"Using {num_gpus} gpus")
     if not args.no_cuda and torch.cuda.is_available():
         cudnn.benchmark = True
         args.device = "cuda"
