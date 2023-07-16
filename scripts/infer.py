@@ -20,7 +20,7 @@ def infer(image):
     # print(args.__dict__)
     args= {'model': 'deeplabv3_resnet50_voc', 'dataset': 'pascal_aug', 'save_folder': '~/.torch/models', 
      'input_pic': '../datasets/voc/VOC2012/JPEGImages/2007_000032.jpg', 'outdir': './eval', 'local_rank': 0, 'aux': False}
-    args = Namespace(args)
+    args = Namespace(**args)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # image transform
