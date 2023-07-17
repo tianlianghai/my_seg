@@ -95,6 +95,7 @@ if __name__ == '__main__':
     else:
         args.distributed = False
         args.device = "cpu"
+    print("Using device ", args.device)
     if args.distributed:
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
